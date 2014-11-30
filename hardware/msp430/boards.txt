@@ -70,7 +70,7 @@ lpmsp430f5529_25.build.variant=launchpad_f5529
 lpmsp430f5529_25.upload.maximum_ram_size=1024
 
 ##############################################################
-lpmsp430fr5969.name=LaunchPad w/ msp430fr5969 (V2.0 and higher only!)
+lpmsp430fr5969.name=LaunchPad w/ msp430fr5969
 lpmsp430fr5969.upload.protocol=tilib
 lpmsp430fr5969.upload.maximum_size=65536
 lpmsp430fr5969.build.mcu=msp430fr5969
@@ -79,5 +79,16 @@ lpmsp430fr5969.build.f_cpu=8000000L
 lpmsp430fr5969.build.core=msp430
 lpmsp430fr5969.build.variant=launchpad_fr5969
 lpmsp430fr5969.upload.maximum_ram_size=1024
+
+##############################################################
+stormninja.name=Storm Ninja p2
+stormninja.upload.protocol=tilib
+stormninja.upload.maximum_size=65536
+stormninja.build.mcu=msp430fr5969
+#stormninja.build.f_cpu=16000000L
+stormninja.build.f_cpu=8000000L
+stormninja.build.core=msp430
+stormninja.build.variant=storm_ninja_p2
+stormninja.upload.maximum_ram_size=1024
 
 ##############################################################
