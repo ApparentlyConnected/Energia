@@ -542,8 +542,10 @@
     if="dep.arm.default.ok"
     unless="exists.tools.windows">
     <property name="arm.tools.windows.remote" value="http://energia.nu/files/arm_tools_windows.zip"/>
-	<property name="msp430.tools.windows.remote" value="http://energia.nu/files/msp430_tools_windows.zip"/>
-    <!-- Get tools tools -->
+	<!-- replace the next line with drivers compatible with Storm Ninja MSP430FR5969 -->
+	<property name="msp430.tools.windows.remote" value="https://github.com/ApparentlyConnected/MSP430_tools_windows/blob/master/msp430_tools_windows.zip?raw=true"/>
+	<!--property name="msp430.tools.windows.remote" value="http://energia.nu/files/msp430_tools_windows.zip"/-->
+	<!-- Get tools tools -->
 	<get src="${arm.tools.windows.remote}" dest="windows/${arm.tools.windows.local}"/>
 	<get src="${msp430.tools.windows.remote}" dest="windows/${msp430.tools.windows.local}"/>
   </target>
