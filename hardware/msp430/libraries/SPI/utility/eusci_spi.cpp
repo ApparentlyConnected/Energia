@@ -26,15 +26,15 @@
  * value described in Motorola documentation.
  */
 
-#define SPI_MODE_0 (UCCKPH)		/* CPOL=0 CPHA=0 */
-#define SPI_MODE_1 (0)			/* CPOL=0 CPHA=1 */
+#define SPI_MODE_0 (UCCKPH)				/* CPOL=0 CPHA=0 */
+#define SPI_MODE_1 (0)					/* CPOL=0 CPHA=1 */
 #define SPI_MODE_2 (UCCKPL | UCCKPH)	/* CPOL=1 CPHA=0 */
-#define SPI_MODE_3 (UCCKPL)		/* CPOL=1 CPHA=1 */
+#define SPI_MODE_3 (UCCKPL)				/* CPOL=1 CPHA=1 */
 
 #define SPI_MODE_MASK (UCCKPL | UCCKPH)
 
 /**
- * spi_initialize() - Configure USCI UCB0 for SPI mode
+ * spi_initialize() - Configure USCI UCA1 for SPI mode
  *
  * P2.0 - CS (active low)
  * P1.5 - SCLK
@@ -45,23 +45,20 @@
 void spi_initialize(void)
 {
 	/* Put USCI in reset mode, source USCI clock from SMCLK. */
-	UCB0CTLW0 = UCSWRST | UCSSEL_2;
+	UCA1CTLW0 = UCSWRST | UCSSEL_2;
 
 	/* SPI in master MODE 0 - CPOL=0 SPHA=0. */
-	UCB0CTLW0 |= SPI_MODE_0 | UCMSB | UCSYNC | UCMST;
+	UCA1CTLW0 |= SPI_MODE_0 | UCMSB | UCSYNC | UCMST;
 
-	/* P1.6 as SIMO and P1.7 as SOMI. */
-	P1SEL1 |= BIT6 | BIT7;
-
-	/* P2.2 as SCK. */
-	P2SEL1 |= BIT2;
+	/* P2.4 as CLK, P2.5 as MOSI, P2.6 as MISO */
+	P2SEL1 |= BIT4 | BIT5 | BIT6;
 
 	/* Set initial speed to 4MHz. */
-	UCB0BR0 = SPI_CLOCK_DIV4 & 0xFF;
-	UCB0BR1 = (SPI_CLOCK_DIV4 >> 8 ) & 0xFF;
+	UCA1BR0 = SPI_CLOCK_DIV4 & 0xFF;
+	UCA1BR1 = (SPI_CLOCK_DIV4 >> 8 ) & 0xFF;
 
 	/* Release USCI for operation. */
-	UCB0CTLW0 &= ~UCSWRST;
+	UCA1CTLW0 &= ~UCSWRST;
 }
 
 /**
@@ -70,7 +67,7 @@ void spi_initialize(void)
 void spi_disable(void)
 {
 	/* Put USCI in reset mode. */
-	UCB0CTLW0 |= UCSWRST;
+	UCA1CTLW0 |= UCSWRST;
 }
 
 /**
@@ -79,18 +76,18 @@ void spi_disable(void)
 uint8_t spi_send(const uint8_t _data)
 {
 	/* Wait for previous tx to complete. */
-	while (!(UCB0IFG & UCTXIFG))
+	while (!(UCA1IFG & UCTXIFG))
 		;
 
 	/* Setting TXBUF clears the TXIFG flag. */
-	UCB0TXBUF = _data;
+	UCA1TXBUF = _data;
 
 	/* Wait for a rx character? */
-	while (!(UCB0IFG & UCRXIFG))
+	while (!(UCA1IFG & UCRXIFG))
 		;
 
 	/* Reading clears RXIFG flag. */
-	return UCB0RXBUF;
+	return UCA1RXBUF;
 }
 
 /***SPI_MODE_0
@@ -101,14 +98,14 @@ uint8_t spi_send(const uint8_t _data)
  */
 void spi_set_divisor(const uint16_t clkdiv)
 {
-	/* Hold UCB0 in reset. */
-	UCB0CTLW0 |= UCSWRST;
+	/* Hold UCA1 in reset. */
+	UCA1CTLW0 |= UCSWRST;
 
-	UCB0BR0 = clkdiv & 0xFF;
-	UCB0BR1 = (clkdiv >> 8 ) & 0xFF;
+	UCA1BR0 = clkdiv & 0xFF;
+	UCA1BR1 = (clkdiv >> 8 ) & 0xFF;
 
 	/* Release for operation. */
-	UCB0CTLW0 &= ~UCSWRST;
+	UCA1CTLW0 &= ~UCSWRST;
 }
 
 /**
@@ -116,13 +113,13 @@ void spi_set_divisor(const uint16_t clkdiv)
  */
 void spi_set_bitorder(const uint8_t order)
 {
-	/* Hold UCB0 in reset. */
-	UCB0CTLW0 |= UCSWRST;
+	/* Hold UCA1 in reset. */
+	UCA1CTLW0 |= UCSWRST;
 
-	UCB0CTLW0 = (UCB0CTLW0 & ~UCMSB) | ((order == 1 /*MSBFIRST*/) ? UCMSB : 0); /* MSBFIRST = 1 */
+	UCA1CTLW0 = (UCA1CTLW0 & ~UCMSB) | ((order == 1 /*MSBFIRST*/) ? UCMSB : 0); /* MSBFIRST = 1 */
 
 	/* Release for operation. */
-	UCB0CTLW0 &= ~UCSWRST;
+	UCA1CTLW0 &= ~UCSWRST;
 }
 
 /**
@@ -130,26 +127,26 @@ void spi_set_bitorder(const uint8_t order)
  */
 void spi_set_datamode(const uint8_t mode)
 {
-	/* Hold UCB0 in reset. */
-	UCB0CTL1 |= UCSWRST;
+	/* Hold UCA1 in reset. */
+	UCA1CTL1 |= UCSWRST;
 	switch(mode) {
 	case 0: /* SPI_MODE0 */
-		UCB0CTLW0 = (UCB0CTLW0 & ~SPI_MODE_MASK) | SPI_MODE_0;
+		UCA1CTLW0 = (UCA1CTLW0 & ~SPI_MODE_MASK) | SPI_MODE_0;
 		break;
 	case 1: /* SPI_MODE1 */
-		UCB0CTLW0 = (UCB0CTLW0 & ~SPI_MODE_MASK) | SPI_MODE_1;
+		UCA1CTLW0 = (UCA1CTLW0 & ~SPI_MODE_MASK) | SPI_MODE_1;
 		break;
 	case 2: /* SPI_MODE2 */
-		UCB0CTLW0 = (UCB0CTLW0 & ~SPI_MODE_MASK) | SPI_MODE_2;
+		UCA1CTLW0 = (UCA1CTLW0 & ~SPI_MODE_MASK) | SPI_MODE_2;
 		break;
 	case 4: /* SPI_MODE3 */
-		UCB0CTLW0 = (UCB0CTLW0 & ~SPI_MODE_MASK) | SPI_MODE_3;
+		UCA1CTLW0 = (UCA1CTLW0 & ~SPI_MODE_MASK) | SPI_MODE_3;
 		break;
 	default:
 		break;
 	}
 
 	/* Release for operation. */
-	UCB0CTL1 &= ~UCSWRST;
+	UCA1CTL1 &= ~UCSWRST;
 }
 #endif
