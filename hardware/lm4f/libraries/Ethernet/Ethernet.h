@@ -5,6 +5,7 @@
 #include <lwip/err.h>
 #include <netif/tivaif.h>
 #include <arch/lwiplib.h>
+#include <MACAddress.h>
 #include "IPAddress.h"
 #include "EthernetClient.h"
 #include "EthernetServer.h"
@@ -18,6 +19,7 @@ const IPAddress CLASS_C_SUBNET(255, 0, 0, 0);
 
 class EthernetClass {
 private:
+	uint8_t pui8MACArray[8];
 public:
 	void enableLinkLed();
 	void enableActivityLed();
@@ -30,11 +32,11 @@ public:
 	void begin(uint8_t *mac_address, IPAddress local_ip, IPAddress dns_server, IPAddress gateway, IPAddress subnet);
 
 	/* Start ethernet in DHCP mode and use internal MAC */
-	int begin();
-	void begin(IPAddress local_ip);
-	void begin(IPAddress local_ip, IPAddress dns_server);
-	void begin(IPAddress local_ip, IPAddress dns_server, IPAddress gateway);
-	void begin(IPAddress local_ip, IPAddress dns_server, IPAddress gateway, IPAddress subnet);
+	int begin() { begin(0); };
+	void begin(IPAddress local_ip) { begin(0, local_ip); }
+	void begin(IPAddress local_ip, IPAddress dns_server) { begin(0, local_ip, dns_server); };
+	void begin(IPAddress local_ip, IPAddress dns_server, IPAddress gateway) { begin(0, local_ip, dns_server, gateway); };
+	void begin(IPAddress local_ip, IPAddress dns_server, IPAddress gateway, IPAddress subnet) { begin(0, local_ip, dns_server, gateway, subnet); };
 
 	/* For Arduino compatibility */
 	int maintain();
@@ -44,6 +46,8 @@ public:
 	IPAddress subnetMask();
 	IPAddress gatewayIP();
 	IPAddress dnsServerIP();
+
+	uint8_t* macAddress(uint8_t* mac);
 
 	/* Who is your friend? */
 	friend class EthernetClient;
