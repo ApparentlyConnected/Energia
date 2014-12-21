@@ -30,6 +30,20 @@
 #define LCD_VERTICAL_MAX    128 	// 128 for LS013B7DH03
 #define LCD_HORIZONTAL_MAX  128 	// 128 for LS013B7DH03
 
+#define IMAGE_FMT_1BPP_UNCOMP   0x01
+
+
+typedef struct 
+{
+    uint8_t BPP; 					// Bits per pixel and Compressed/Uncompressed
+    uint16_t XSize;  				// X size
+    uint16_t YSize;   				// Y size            
+    uint16_t NumColors;     		// Number of Colors in Palette
+    const uint32_t * pPalette;   	// Pointer to Palette
+    const unsigned char * pPixel;   // Pointer to pixel data  
+}
+tImage;
+
 class LCD_Sharp128_SPI {
 public:
 //
@@ -45,10 +59,12 @@ public:
     void setFont(uint8_t font=0);
     void setXY(uint8_t x, uint8_t y, uint8_t ulValue);
     void text(uint8_t x, uint8_t y, String s);
+	void image(uint8_t x, uint8_t y, const tImage *img);
     void flush();
 private:
     uint8_t _font;
 	void TA0_enableVCOMToggle();
 	void TA0_turnOff();
 };
+
 #endif

@@ -172,6 +172,30 @@ void LCD_Sharp128_SPI::text(uint8_t x, uint8_t y, String s) {
     }
 }
 
+/* Compatible with Texas Instruments Image Reformer tool: http://www.ti.com/tool/MSP430-GRLIB */
+void LCD_Sharp128_SPI::image(uint8_t x, uint8_t y, const tImage *img) {
+	uint8_t i, j;
+	uint8_t imask, fmask;
+	uint16_t iindex;
+	uint8_t xmax = img->XSize;
+	uint8_t ymax = img->YSize;
+	const uint8_t *idata = (const uint8_t*)img->pPixel;
+	uint8_t xcols = xmax >> 3;
+	
+	if(xmax & 0x7)
+		xcols++;
+	
+	for(i=0; i<xmax; i++ ) {
+		for(j=0; j<ymax; j++ )  {
+			imask = (0x80 >> (i & 0x7));
+			if(imask & idata[j*xcols + (i>>3)])
+				DisplayBuffer[y+j][((x+i)>>3)] |= (0x80 >> ((x+i) & 0x7));
+			else
+				DisplayBuffer[y+j][((x+i)>>3)] &= ~(0x80 >> ((x+i) & 0x7));
+		}
+	}	
+}
+
 const uint8_t referse_data[] = {0x0, 0x8, 0x4, 0xC, 0x2, 0xA, 0x6, 0xE, 0x1, 0x9, 0x5, 0xD, 0x3, 0xB, 0x7, 0xF};
 uint8_t reverse(uint8_t x)
 {
