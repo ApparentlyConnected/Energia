@@ -1,0 +1,62 @@
+##################################################
+# Syntax Coloring Map For RN4020
+##################################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+RN4020					KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin						KEYWORD2
+WhoAmI					KEYWORD2
+BT_SetupModule		KEYWORD2
+BT_SendPacket		KEYWORD2
+BT_ReceivePacket	KEYWORD2
+BT_SendCommand	KEYWORD2
+BT_Reboot				KEYWORD2
+BT_factReset			KEYWORD2
+BT_Wake					KEYWORD2
+BT_Sleep					KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+BT_SOF_1				LITERAL1
+BT_SOF_2				LITERAL1
+
+EXT_PROP				LITERAL1
+AUTH_WRITE			LITERAL1
+INDICATE					LITERAL1
+NOTIFY						LITERAL1
+WRITE						LITERAL1
+WR_WO_R				LITERAL1
+READ						LITERAL1
+BROADCAST				LITERAL1
+
+SHRT_TIMEOUT		LITERAL1
+LONG_TIMEOUT		LITERAL1
+
+SETUP_OK				LITERAL1
+SETUP_VERFAIL		LITERAL1
+SETUP_FEATFAIL		LITERAL1
+SETUP_NAMEFAIL	LITERAL1
+SETUP_SCRPTFAIL	LITERAL1
+SETUP_CKFTFAIL		LITERAL1
+SETUP_CKNMFAIL	LITERAL1
+SETUP_FCRSTFAIL	LITERAL1
+
+REBOOT_OK				LITERAL1
+REBOOT_CMDFAIL	LITERAL1
+REBOOT_200_TO		LITERAL1
+REBOOT_0ERR			LITERAL1
+REBOOT_3K_TO		LITERAL1
+REBOOT_ERR			LITERAL1
+
+MAX_MESSAGE			LITERAL1
+

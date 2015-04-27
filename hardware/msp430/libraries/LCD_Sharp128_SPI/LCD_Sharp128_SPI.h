@@ -27,11 +27,25 @@
 #include "Terminal12.h"
 #include "SPI.h"
 
-#define LCD_VERTICAL_MAX    128 	// 128 for LS013B7DH03
-#define LCD_HORIZONTAL_MAX  128 	// 128 for LS013B7DH03
+#define LCD_VERTICAL_MAX    		128 	// 128 for LS013B7DH03
+#define LCD_HORIZONTAL_MAX  		128 	// 128 for LS013B7DH03
 
-#define IMAGE_FMT_1BPP_UNCOMP   0x01
+#define IMAGE_FMT_1BPP_UNCOMP   	0x01
 
+#define SHARP_SEND_TOGGLE_VCOM_COMMAND		0x01
+#define SHARP_SKIP_TOGGLE_VCOM_COMMAND 		0x00
+
+#define SHARP_LCD_TRAILER_BYTE				0x00
+
+#define SHARP_VCOM_TOGGLE_BIT 		   		0x40
+
+#define SHARP_LCD_CMD_CHANGE_VCOM			0x00
+#define SHARP_LCD_CMD_CLEAR_SCREEN			0x20
+#define SHARP_LCD_CMD_WRITE_LINE			0x80
+
+#define P_CS   25
+#define P_VCC  6
+#define P_DISP 6
 
 typedef struct 
 {
@@ -47,10 +61,7 @@ tImage;
 class LCD_Sharp128_SPI {
 public:
 //
-//
     LCD_Sharp128_SPI();
-//
-//
     LCD_Sharp128_SPI(uint8_t pinChipSelect, uint8_t pinDISP, uint8_t pinVCC);
     void begin();
     String WhoAmI();
@@ -61,10 +72,18 @@ public:
     void text(uint8_t x, uint8_t y, String s);
 	void image(uint8_t x, uint8_t y, const tImage *img);
     void flush();
+//
 private:
+//
     uint8_t _font;
-	void TA0_enableVCOMToggle();
-	void TA0_turnOff();
+
+	uint8_t _pinDISP;
+	uint8_t _pinVCC;
+	uint8_t _pinChipSelect;
+
+	uint8_t flagSendToggleVCOMCommand;
+	uint8_t sharpVCOMbit;
+//
 };
 
 #endif
