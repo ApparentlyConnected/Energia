@@ -43,9 +43,9 @@
 #define SHARP_LCD_CMD_CLEAR_SCREEN			0x20
 #define SHARP_LCD_CMD_WRITE_LINE			0x80
 
-#define P_CS   25
-#define P_VCC  6
-#define P_DISP 6
+#define P_CS   14
+#define P_VCC  7
+#define P_DISP 7
 
 typedef struct 
 {

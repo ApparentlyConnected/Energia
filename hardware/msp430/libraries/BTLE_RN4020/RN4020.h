@@ -53,11 +53,11 @@
 #define ADVERT_ERR		79
 
 // ************ Default Pins ************ //
-#define P_MLDP		9
-#define P_WAKE_HW	11
-#define P_WAKE_SW	10
-#define P_CONN		7
-#define P_RTS		8
+#define P_MLDP			4
+#define P_WAKE_HW	2
+#define P_WAKE_SW	3
+#define P_CONN			6
+#define P_RTS				5
 
 // ************ Communication ************ //
 #define MAX_MESSAGE		128
