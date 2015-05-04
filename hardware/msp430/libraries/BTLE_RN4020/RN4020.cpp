@@ -135,29 +135,38 @@ char RN4020::BT_SendPacket(char *messageout) {
 }
 
 char RN4020::BT_ReceivePacket(char *messagein) {
-	static BluetoothDecodeState btDecodeState = WaitForData;
+	static BluetoothDecodeState btDecodeState = WaitForSOF1;
 	char messageChar;                                   //unsigned char read from the UART buffer
 
     char buffer[MAX_MESSAGE];	// input message
     char *buf_ptr = buffer;
     buffer[0] = '\0';
 
-    while (IsNewRxData())                               //Check if new data unsigned char from BT module and return if nothing new
+    uint16_t timeout = 0;
+
+    if(IsNewRxData())
+    	timeout = 10000;
+
+    while (timeout--)	                               //Check if new data unsigned char from BT module and return if nothing new
     {
         messageChar = Serial.read();                   //Read the data unsigned char for processing
 
         switch(btDecodeState)
         {
-//        case WaitForSOF1:                               //Waiting to receive first start of frame character, SOF1
-//            if (messageChar == BT_SOF_1)                //See if we got the SOF1 character
-//                btDecodeState = WaitForSOF2;            //then wait for the second start of frame character, SOF2
-//            break;
-//        case WaitForSOF2:                               //Waiting to receive second start of frame character, SOF2
-//            if(messageChar == BT_SOF_2)                 //See if this is the second of the two unsigned char start Of frame
-//                btDecodeState = WaitForData;         	//Is complete SOF1, SOF2 pattern so wait for command unsigned char
-//            else
-//                btDecodeState = WaitForSOF1;            //Did not get complete SOF1, SOF2 pattern so look for new start of frame
-//            break;
+        case WaitForSOF1:                               //Waiting to receive first start of frame character, SOF1
+            if (messageChar == BT_SOF_1) {              //See if we got the SOF1 character
+                btDecodeState = WaitForSOF2;            //then wait for the second start of frame character, SOF2
+                timeout = 10000;
+            }
+            break;
+        case WaitForSOF2:                               //Waiting to receive second start of frame character, SOF2
+            if(messageChar == BT_SOF_2) {               //See if this is the second of the two unsigned char start Of frame
+                btDecodeState = WaitForData;         	//Is complete SOF1, SOF2 pattern so wait for command unsigned char
+                timeout = 10000;
+            }
+            else
+                btDecodeState = WaitForSOF1;            //Did not get complete SOF1, SOF2 pattern so look for new start of frame
+            break;
 //        case WaitForCommand:                            //Waiting to receive command unsigned char
 //            Message->Command = messageChar;             //Save unsigned char as command unsigned char of the message
 //            btDecodeState = WaitForData;                //Indicate now waiting for data unsigned char
@@ -166,10 +175,12 @@ char RN4020::BT_ReceivePacket(char *messagein) {
             if(messageChar == '\r') {                   //See if this is the CR
                 btDecodeState = WaitForLF;              //Is CR so wait for LF
                 *buf_ptr = '\0';
+                timeout = 10000;
             }
             else {
             	*buf_ptr = messageChar;					// append char to string
             	buf_ptr++;
+            	timeout = 10000;
             	if ((buf_ptr - buffer) >= (MAX_MESSAGE - 1)) {	// max message length reached
             		buffer[MAX_MESSAGE - 1] = '\0';
             		btDecodeState = WaitForLF;
@@ -265,7 +276,7 @@ int RN4020::BT_checkMLDP(void) {
 
 	ClearRXBuffer();
 	BT_SendCommand("I\r");						// request MLDP mode
-	BT_CMD_low();
+	BT_CMD_high();
 
 	if(!BT_CheckResponse("MLDP\r\n", SHRT_TIMEOUT)) {	// if we're not ready to go - this will kick us out
 		BT_CMD_mode();
