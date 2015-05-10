@@ -190,7 +190,7 @@ void Port_1(void)
 		}
 	}
 
-	if (stay_asleep != still_sleeping) {
+	if (!stay_asleep) {
 		__bic_SR_register_on_exit(LPM4_bits);
 	}
 }
@@ -214,7 +214,7 @@ void Port_2(void)
 			}
 		}
 	}
-	if (stay_asleep != still_sleeping) {
+	if (!stay_asleep) {
 		__bic_SR_register_on_exit(LPM4_bits);
 	}
 }
@@ -239,7 +239,7 @@ void Port_3(void)
 			}
 		}
 	}
-	if (stay_asleep != still_sleeping) {
+	if (!stay_asleep) {
 		__bic_SR_register_on_exit(LPM4_bits);
 	}
 }
@@ -264,7 +264,7 @@ void Port_4(void)
 			}
 		}
 	}
-	if (stay_asleep != still_sleeping) {
+	if (!stay_asleep) {
 		__bic_SR_register_on_exit(LPM4_bits);
 	}
 }

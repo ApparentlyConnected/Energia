@@ -21,6 +21,7 @@ RN4020::RN4020() {
 	this->_pinWAKE_SW	= P_WAKE_SW;
 	this->_pinConn		= P_CONN;
 	this->_pinRTS		= P_RTS;
+	this->_pinEVENT		= P_EVENT;
 
 	this->start_time = 0;
 	this->diff_time = 0;
@@ -33,12 +34,12 @@ void RN4020::begin() {
     pinMode(this->_pinWAKE_HW, OUTPUT);
     pinMode(this->_pinWAKE_SW, OUTPUT);
     pinMode(this->_pinConn, INPUT);
-    pinMode(this->_pinRTS, OUTPUT);
+    pinMode(this->_pinRTS, INPUT);
+    pinMode(this->_pinEVENT, INPUT);
 
     digitalWrite(this->_pinMLDP, LOW);
     digitalWrite(this->_pinWAKE_HW, HIGH);
     digitalWrite(this->_pinWAKE_SW, HIGH);
-    digitalWrite(this->_pinRTS, HIGH);
 
 	Serial.begin(115200);
 }
@@ -74,9 +75,9 @@ int RN4020::BT_SetupModule(char *Version) {
     //Send "GR" to get feature settings
     BT_SendCommand("gr\r");                         //Get RN4020 module feature settings
 
-    if(!BT_CheckResponse("18002C00\r\n", SHRT_TIMEOUT))           //Check if features are set for auto advertize, MLDP, flow control
+    if(!BT_CheckResponse("3A002000\r\n", SHRT_TIMEOUT))           //Check if features are set for auto advertize, MLDP, flow control
     {                                               //auto enable MLDP, suppress messages during MLDP
-        BT_SendCommand("sr,18002C00\r");            //Features not correect so set features
+        BT_SendCommand("sr,3A002000\r");            //Features not correect so set features
         if(!BT_CheckResponse("AOK\r\n", SHRT_TIMEOUT))
             return SETUP_FEATFAIL;
         changes = TRUE;                             //Have changed a setting so will have to reboot later
@@ -106,7 +107,7 @@ int RN4020::BT_SetupModule(char *Version) {
 
         //Send "GR" to get feature settings
         BT_SendCommand("gr\r");                     //Get RN4020 module feature settings
-        if(!BT_CheckResponse("18002C00\r\n", SHRT_TIMEOUT))       //Check if features are correct
+        if(!BT_CheckResponse("3A002000\r\n", SHRT_TIMEOUT))       //Check if features are correct
             return SETUP_CKFTFAIL;
 
         //Send "GN" to get the name of the device
@@ -201,6 +202,12 @@ char RN4020::BT_ReceivePacket(char *messagein) {
     return FALSE;
 }
 
+int RN4020::BT_GetDeviceInfo(char *dev_string) {
+    BT_SendCommand("D\r");                          //Get RN4020 module MAC address
+    if(!BT_GetResponse(dev_string))                 //Get response
+        return SETUP_VERFAIL;
+}
+
 void RN4020::BT_SendCommand(char *data) {
 	uart_send(data);
 }
@@ -243,6 +250,13 @@ void RN4020::BT_Wake(void) {
 	BT_CMD_low();
 }
 
+void RN4020::BT_Rest(void) {
+//	BT_CMD_mode();								// enter command mode
+//	BT_CMD_high();
+	digitalWrite(this->_pinWAKE_SW, LOW);
+	digitalWrite(this->_pinWAKE_HW, LOW);
+}
+
 void RN4020::BT_Sleep(void) {
 	BT_CMD_mode();								// enter command mode
 	digitalWrite(this->_pinWAKE_HW, LOW);
@@ -252,11 +266,10 @@ void RN4020::BT_Sleep(void) {
 
 // enable radio advertise info
 int RN4020::BT_advertise(void) {
-
 	BT_CMD_mode();								// enter command mode
 	ClearRXBuffer();
 
-	BT_SendCommand( "A\r" );					// Advertise
+	BT_SendCommand( "A,0BB8\r" );					// Advertise
 	if(!BT_CheckResponse("AOK\r\n", SHRT_TIMEOUT))  //Check that we received AOK confirmation
 		return ADVERT_ERR;
 
@@ -264,10 +277,28 @@ int RN4020::BT_advertise(void) {
 }
 
 //**********************************************************************************************************************
+// Check if MLDP data is received and waiting to read
+int RN4020::IsEvent(void) {
+	if(digitalRead(_pinEVENT))
+		return 1;
+	else
+		return 0;
+}
+
+//**********************************************************************************************************************
 // Check if data has been added to the receive buffer
 int RN4020::IsNewRxData(void) {
 
 	return Serial.available();
+}
+
+//**********************************************************************************************************************
+// Check if the RN4020 module is connected to a device
+int RN4020::IsConnected(void) {
+	if(digitalRead(_pinConn))
+		return 1;
+	else
+		return 0;
 }
 
 // Private functions
@@ -438,6 +469,9 @@ void RN4020::uart_send(char *data) {
 
 	if(*data == '\0')
 		return;
+
+	uint16_t timeout = 10000;
+	while((digitalRead(_pinRTS)) && timeout--) {}		// wait if RN4020 output buffer full
 
 	Serial.write(data);
 }

@@ -53,11 +53,12 @@
 #define ADVERT_ERR		79
 
 // ************ Default Pins ************ //
-#define P_MLDP			4
+#define P_MLDP		4
 #define P_WAKE_HW	2
 #define P_WAKE_SW	3
-#define P_CONN			6
-#define P_RTS				5
+#define P_CONN		6
+#define P_RTS		5
+#define P_EVENT		18
 
 // ************ Communication ************ //
 #define MAX_MESSAGE		128
@@ -83,13 +84,17 @@ public:
 	int BT_SetupModule(char *Version);
 	char BT_SendPacket(char *messageout);
 	char BT_ReceivePacket(char *messagein);
+	int BT_GetDeviceInfo(char *dev_string);
 	void BT_SendCommand(char *data);
 	int BT_Reboot(void);
 	void BT_factReset(void);
 	void BT_Wake(void);
+	void BT_Rest(void);
 	void BT_Sleep(void);
 	int BT_advertise(void);
+	int IsEvent(void);
 	int IsNewRxData(void);
+	int IsConnected(void);
 //
 private:
 //
@@ -119,6 +124,7 @@ private:
 	uint8_t _pinWAKE_SW;
 	uint8_t _pinConn;
 	uint8_t _pinRTS;
+	uint8_t _pinEVENT;
 //
 };
 
